@@ -20,7 +20,7 @@ else
     done
 fi
 
-flags=(-std=c++14 -Wall -Wextra -Wpedantic -O2 -DNDEBUG -Iinclude)
+flags=(-std=c++14 -Wall -Wextra -Wpedantic -O2 -DNDEBUG -Iinclude -Ilibs/glm)
 if [[ "$(uname)" == Darwin ]]; then
     # macOS: bibliotecas do Homebrew (brew install glfw glew glm).
     compiler=clang++
