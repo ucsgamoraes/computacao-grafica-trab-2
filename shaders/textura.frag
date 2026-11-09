@@ -3,7 +3,10 @@ in vec3 ourColor;
 in vec2 TexCoord;
 out vec4 FragColor;
 uniform sampler2D texture1;
+uniform bool selected;
 
 void main() {
-    FragColor = vec4(texture(texture1, TexCoord).rgb * ourColor, 1.0);
+    vec3 color = texture(texture1, TexCoord).rgb * ourColor;
+    if (selected) color = mix(color, vec3(1.0, 0.63, 0.08), 0.55);
+    FragColor = vec4(color, 1.0);
 }

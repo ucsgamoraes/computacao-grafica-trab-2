@@ -10,7 +10,7 @@ enum class TipoPeca { Peao, Torre, Cavalo, Bispo, Dama, Rei };
 class Peca : public Object {
 public:
     Peca(int id, TipoPeca tipo, bool branca, int linha, int coluna);
-    void draw(Shader& shader, glm::mat4 parentTransform) const override;
+    void desenhar(Shader& cor, Shader& textura, bool selecionada) const;
     bool intersectRay(glm::vec3 origin, glm::vec3 direction, float& distance) const;
     void mover(int novaLinha, int novaColuna);
     std::string descricao() const;

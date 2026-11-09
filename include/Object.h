@@ -13,7 +13,9 @@ public:
     float angle = 0.0f;
 
     virtual ~Object() = default;
-    virtual void draw(Shader& shader, glm::mat4 parentTransform) const = 0;
+    // Vazio por padrão, como no exemplo do professor. Mesh desenha a malha;
+    // Peca usa desenhar(), que recebe os dois shaders.
+    virtual void draw(Shader&, glm::mat4) const {}
     glm::mat4 modelMatrix(glm::mat4 parentTransform = glm::mat4(1.0f)) const;
 };
 

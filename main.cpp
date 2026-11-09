@@ -98,6 +98,7 @@ int main() {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         const glm::mat4 view = camera.view(), projection = perspective(width, height);
         textureShader.use();
+        textureShader.setBool("selected", false);
         textureShader.setMat4("view", view);
         textureShader.setMat4("projection", projection);
         textureShader.setInt("texture1", 0);
@@ -109,10 +110,10 @@ int main() {
         shader.setMat4("view", view);
         shader.setMat4("projection", projection);
         tabuleiro.drawCasas(shader);
-        for (std::size_t i = 0; i < pecas.size(); ++i) {
-            shader.setBool("selected", input.selecionada == static_cast<int>(i));
-            pecas[i]->draw(shader, glm::mat4(1.0f));
-        }
+
+        // Peças: cada parte usa o shader de cor ou o de textura.
+        for (std::size_t i = 0; i < pecas.size(); ++i)
+            pecas[i]->desenhar(shader, textureShader, input.selecionada == static_cast<int>(i));
         glfwSwapBuffers(window);
     }
     return 0;
