@@ -1,6 +1,6 @@
 # Xadrez 3D
 
-Trabalho de Computação Gráfica em C++14 e OpenGL 3.3 Core. A cena contém um tabuleiro 8×8, 32 peças compostas por formas geométricas, base texturizada, dois programas de shader, câmera navegável e movimentação de peças pelo mouse.
+Trabalho de Computação Gráfica em C++14 e OpenGL 3.3 Core. A cena contém um tabuleiro 8×8, 32 peças compostas por formas geométricas, base e peças texturizadas, dois programas de shader, câmera navegável e movimentação de peças pelo mouse.
 
 ## Executar pelo script
 
@@ -12,23 +12,43 @@ O script compila a versão Release na primeira execução e quando os fontes ou 
 
 ## Abrir pelo Code::Blocks
 
-No Arch Linux, as dependências são as bibliotecas já instaladas pelo grupo:
+Abra `Xadrez3D.cbp`, escolha o target do seu sistema na caixa **Build target** e use **Build and run (F9)**:
+
+| Sistema | Targets |
+| --- | --- |
+| Linux | **Linux Debug** ou **Linux Release** |
+| Windows | **Windows Debug** ou **Windows Release** |
+
+Cada target só compila no sistema indicado. Em todos eles, o programa roda a partir da raiz do projeto, onde estão `shaders/` e `res/images/`. Como no exemplo do professor, o programa abre junto um console com mensagens: versão do OpenGL, peça selecionada e movimentos.
+
+### Linux
+
+O projeto usa GLFW e GLEW instalados no sistema, como o exemplo `GLFW_Cubo_OO` do professor.
 
 ```bash
-sudo pacman -S --needed base-devel mesa glfw-x11 glew glm
+sudo apt install build-essential libglfw3-dev libglew-dev xterm          # Debian/Ubuntu
+sudo pacman -S --needed base-devel mesa glfw-x11 glew xterm codeblocks   # Arch
 ```
 
-Caso a IDE ainda não esteja instalada:
-
-```bash
-sudo pacman -S --needed codeblocks
-```
-
-Abra `Xadrez3D.cbp`, selecione **Debug** ou **Release** e use **Build and run (F9)**. O projeto usa o compilador GNU GCC, inclui `include/` e vincula `glfw`, `GLEW` e `GL`. GLM e stb_image não exigem bibliotecas adicionais no linker. O diretório de execução dos dois targets é a raiz do projeto, onde estão `shaders/` e `res/images/`.
-
-Os dois targets são aplicativos gráficos e abrem diretamente, sem depender de `xterm` ou do console runner. Se o projeto já estava aberto antes de atualizar o `.cbp`, feche e reabra o projeto para carregar essa configuração.
+O `xterm` é o terminal que o Code::Blocks usa para mostrar o console do programa no Linux.
 
 Em sessões Wayland, o aplicativo seleciona X11/XWayland quando essa opção está disponível no GLFW. Isso é necessário porque a versão do GLEW instalada no ambiente usa GLX. O compositor precisa oferecer XWayland.
+
+### Windows
+
+Não é preciso instalar nenhuma biblioteca: tudo vem na pasta `libs/`. Use o Code::Blocks com MinGW de 64 bits (o instalador `codeblocks-...-mingw-setup.exe`).
+
+- `libs/glfw/`: GLFW 3.4, versão pré-compilada para MinGW 64 bits. O programa usa a `glfw3.dll` da raiz do projeto.
+- `libs/glew/`: GLEW 2.2.0 em código-fonte. O `glew.c` é compilado junto com o projeto (só nos targets Windows), com `GLEW_STATIC`.
+- `libs/glm/`: GLM 1.0.1, só cabeçalhos. Também é usada no Linux, então lá não é preciso instalar a GLM.
+
+As bibliotecas do compilador (`libstdc++` e `libgcc`) vão embutidas no executável. Por isso o `.exe` só precisa da `glfw3.dll` para rodar. Se for executá-lo fora do Code::Blocks, rode a partir da raiz do projeto, para ele achar os shaders, a textura e a DLL.
+
+As licenças das bibliotecas estão nas respectivas pastas em `libs/`.
+
+### Em todos os sistemas
+
+Se o projeto já estava aberto antes de atualizar o `.cbp`, feche e reabra o projeto para carregar a configuração nova.
 
 ## Controles
 
@@ -43,13 +63,15 @@ Em sessões Wayland, o aplicativo seleciona X11/XWayland quando essa opção est
 | Clique direito | Cancelar a seleção |
 | Escape | Fechar a janela |
 
-Não há turnos, regras de jogada ou captura. Qualquer peça pode ir para qualquer casa, inclusive uma casa ocupada. O clique no destino usa a superfície do tabuleiro. Um destino externo mantém a seleção para uma nova tentativa. A restrição opcional de ocupação não foi implementada.
+Não há turnos, regras de jogada ou captura. Qualquer peça pode ir para qualquer casa vazia. O clique no destino usa a superfície do tabuleiro. Um destino fora do tabuleiro ou uma casa ocupada mantém a seleção para uma nova tentativa; a casa ocupada é avisada no console e no título da janela. Essa é a restrição opcional do enunciado: duas peças nunca ocupam a mesma casa.
 
 ## Estrutura e referências
 
 `Application` cuida da janela e do contexto. `Object` concentra as transformações; `Mesh` cuida dos buffers compartilhados pelas implementações de cubo, cilindro, esfera e prisma triangular. `Peca` compõe essas formas pelo mesmo princípio de `Banrisul` em `GLFW_Cubo_OO`. `Tabuleiro`, `Camera` e as funções de `Interacao` mantêm as coordenadas consistentes entre desenho e mouse.
 
-A base desenha com `textura.frag`; casas e peças usam `cor.frag`. Ambos usam `cena.vert`, com `projection * view * model` e layout posição/cor/UV. O teste de profundidade permanece ativo. Não há iluminação dinâmica; as variações de cor são definidas nos vértices para evidenciar o volume.
+A base e o corpo das peças usam `textura.frag`; as casas e os enfeites das peças (cabeça do peão, ameias, orelhas e olhos do cavalo, bolinha do bispo, coroa da dama e cruz do rei) usam `cor.frag`. Cada parte da peça guarda o campo `texturizada`, e `Peca::desenhar` ativa o programa correspondente antes de desenhá-la. Ambos usam `cena.vert`, com `projection * view * model` e layout posição/cor/UV. O teste de profundidade permanece ativo. Não há iluminação dinâmica; as variações de cor são definidas nos vértices para evidenciar o volume.
+
+A textura `res/images/madeira.jpg` guarda só os veios da madeira, em cinza claro. Como `textura.frag` multiplica a imagem pela cor do vértice, a mesma imagem fica creme nas peças brancas, marrom escuro nas pretas e marrom médio na base. A imagem foi derivada de [Wood049](https://ambientcg.com/view?id=Wood049), do ambientCG (licença CC0), convertida para tons de cinza com ImageMagick.
 
 O planejamento e a origem das adaptações estão em [TASKS.md](TASKS.md) e [REFERENCIAS.md](REFERENCIAS.md). Os arquivos originais de `referencias/` foram preservados. A seleção usa volumes locais por parte da peça; regiões vazias próximas às bordas de formas curvas podem integrar esses volumes simplificados.
 

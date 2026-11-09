@@ -6,7 +6,7 @@ Este guia cruza as cinco apresentações em `referencias/aulas/` com o código a
 
 O trabalho é uma aplicação interativa de Computação Gráfica: um tabuleiro de xadrez 3D, com peças construídas por composição geométrica, duas formas de renderização, câmera navegável e interação pelo mouse.
 
-O objetivo é demonstrar modelagem, transformações, projeção, shaders, textura e conversão entre coordenadas. Não há regras de xadrez, turnos, captura ou bloqueio de casas ocupadas. A movimentação ocorre entre centros de casas, por dois cliques, sem arrastar e sem animação de percurso.
+O objetivo é demonstrar modelagem, transformações, projeção, shaders, textura e conversão entre coordenadas. Não há regras de xadrez, turnos ou captura. Como no opcional do enunciado, uma peça não pode ir para uma casa ocupada. A movimentação ocorre entre centros de casas, por dois cliques, sem arrastar e sem animação de percurso.
 
 O encadeamento que organiza toda a explicação é:
 
@@ -62,7 +62,7 @@ Explique o layout somente se necessário: posição com três floats, cor com tr
 
 > “O tabuleiro usa o plano XZ, com Y indicando a altura. A superfície das casas está em Y igual a zero. Cada casa tem lado um. Dois laços geram as oito linhas e oito colunas. A paridade da soma da linha com a coluna alterna as cores.”
 
-> “O tabuleiro fica centralizado na origem. O centro de uma casa é calculado por coluna menos 3,5 e linha menos 3,5. Essa mesma conversão posiciona as peças e define seus destinos. Assim, o desenho e a interação seguem uma única convenção.”
+> “O tabuleiro fica centralizado na origem. O centro de uma casa é calculado por 3,5 menos a coluna e linha menos 3,5. A coluna entra invertida para que, vista do lado das brancas, a coluna A fique à esquerda, como num tabuleiro real. Essa mesma conversão posiciona as peças e define seus destinos. Assim, o desenho e a interação seguem uma única convenção.”
 
 > “No shader, usamos projection vezes view vezes model vezes o vértice. Model posiciona o objeto no mundo. View expressa a cena em relação à câmera. Projection define a perspectiva. A multiplicação atua da direita para a esquerda.”
 
@@ -70,7 +70,7 @@ Explique o layout somente se necessário: posição com três floats, cor com tr
 
 ### 4:00–5:15 — Modelagem e composição das peças
 
-**Mostre:** um cavalo, um rei e uma dama. Se necessário, abra `Peca::init` e `Peca::draw`.
+**Mostre:** um cavalo, um rei e uma dama. Se necessário, abra `Peca::init` e `Peca::desenhar`.
 
 **Fala sugerida:**
 
@@ -84,15 +84,19 @@ Explique o layout somente se necessário: posição com três floats, cor com tr
 
 ### 5:15–6:15 — Shaders, cor e textura
 
-**Mostre:** a base texturizada e os três arquivos em `shaders/`.
+**Mostre:** a base e as peças texturizadas, os enfeites em cor sólida e os três arquivos em `shaders/`.
 
 **Fala sugerida:**
 
-> “A cena usa dois programas de shader. Eles compartilham o vertex shader cena.vert. O programa com cor.frag desenha as casas e as peças. O programa com textura.frag desenha a base com a imagem de pedra. Portanto, são dois programas, formados a partir de três arquivos.”
+> “A cena usa dois programas de shader. Eles compartilham o vertex shader cena.vert. O programa com textura.frag desenha a base e o corpo das peças com a imagem de madeira. O programa com cor.frag desenha as casas e os enfeites das peças: cabeça do peão, ameias da torre, orelhas e olhos do cavalo, bolinha do bispo, coroa da dama e cruz do rei. Portanto, são dois programas, formados a partir de três arquivos.”
+
+> “Cada parte de uma peça guarda o campo texturizada. Em Peca::desenhar, cada parte ativa o programa correspondente antes de ser desenhada. Assim, toda peça é composta por formas básicas e desenhada com os dois shaders.”
+
+> “O textura.frag multiplica a cor da imagem pela cor do vértice. Por isso a mesma imagem fica clara nas peças brancas e escura nas pretas.”
 
 > “As coordenadas UV relacionam a imagem à superfície. A imagem é carregada com stb_image e enviada ao OpenGL. O fragment shader consulta a textura usando essas coordenadas. O programa também gera mipmaps para a amostragem quando a textura aparece reduzida.”
 
-> “A seleção muda um uniform booleano. O shader mistura a cor da peça com uma cor alaranjada. A sensação de volume vem de variações de cor nos vértices; o projeto não calcula iluminação dinâmica.”
+> “A seleção muda um uniform booleano, presente nos dois fragment shaders. Eles misturam a cor da peça com uma cor alaranjada. A sensação de volume vem de variações de cor nos vértices; o projeto não calcula iluminação dinâmica.”
 
 **Referências:** shaders-pt2, pp. 38–65.
 
@@ -133,7 +137,7 @@ Finalize essa parte com:
 1. Redimensione a janela e mostre que o tabuleiro preserva as proporções.
 2. Selecione novamente uma peça já movida.
 3. Se houver tempo, mova uma torre para uma casa fora de sua regra convencional e explique o movimento livre.
-4. Evite sobrepor peças na demonstração principal: a ocupação não é bloqueada e os modelos podem se sobrepor.
+4. Selecione uma peça e clique numa casa ocupada: o título da janela avisa que a casa está ocupada e a seleção continua. Depois clique numa casa vazia.
 
 **Fala sugerida:**
 
@@ -231,14 +235,16 @@ O tabuleiro tem 64 cubos achatados e uma base maior. As casas têm espessura de 
 Para linha `r` e coluna `c`, ambas entre 0 e 7:
 
 ```text
-centro = (c - 3.5, 0, r - 3.5)
-coluna = floor(x + 4)
+centro = (3.5 - c, 0, r - 3.5)
+coluna = floor(4 - x)
 linha = floor(z + 4)
 ```
 
-Antes da conversão inversa, X e Z devem estar em `[-4, 4)`. O limite superior é excluído para não gerar índice 8. A1 é escura. A coluna 0 representa A; a linha 0 representa a fileira 1.
+A coluna usa `3.5 - c`, e não `c - 3.5`, porque a câmera começa do lado das brancas olhando para +Z. Desse ponto de vista, +X aparece à esquerda da tela. Com `3.5 - c`, a coluna A (c = 0) fica em X = 3.5, à esquerda de quem joga de brancas, como num tabuleiro real: dama à esquerda do rei e casa clara no canto direito.
 
-Exemplo: E2 tem linha 1 e coluna 4, com centro `(0.5, 0, -2.5)`. E4 tem linha 3 e coluna 4, com centro `(0.5, 0, -0.5)`.
+Antes da conversão inversa, X deve estar em `(-4, 4]` e Z em `[-4, 4)`. Os limites que gerariam índice 8 ficam de fora. A1 é escura. A coluna 0 representa A; a linha 0 representa a fileira 1.
+
+Exemplo: E2 tem linha 1 e coluna 4, com centro `(-0.5, 0, -2.5)`. E4 tem linha 3 e coluna 4, com centro `(-0.5, 0, -0.5)`.
 
 Cada lado tem oito peões, duas torres, dois cavalos, dois bispos, uma dama e um rei. As peças principais ocupam A–H na ordem torre, cavalo, bispo, dama, rei, bispo, cavalo, torre. As brancas começam nas linhas internas 0 e 1; as pretas, em 7 e 6. As damas ficam em D1/D8 e os reis em E1/E8.
 
@@ -272,11 +278,11 @@ O deslocamento horizontal usa direção normalizada, velocidade de 4 unidades po
 
 UV são coordenadas da imagem associadas aos vértices. Elas são interpoladas para consultar a textura na superfície dos triângulos.
 
-No trabalho, `pedra-28.jpg` é aplicada à base. A textura é vinculada à unidade 0. O uniform `sampler2D texture1` recebe o número dessa unidade, não o identificador do objeto de textura.
+No trabalho, `madeira.jpg` é aplicada à base e ao corpo das peças. A imagem guarda só os veios da madeira em tons de cinza claro; o tom vem da cor do vértice, creme nas peças brancas, marrom escuro nas pretas e marrom médio na base. A textura é vinculada à unidade 0. O uniform `sampler2D texture1` recebe o número dessa unidade, não o identificador do objeto de textura.
 
 O código configura `GL_REPEAT`, magnificação linear e minificação com `GL_LINEAR_MIPMAP_LINEAR`. Os mipmaps são versões progressivamente menores da imagem. A filtragem usa essas versões para melhorar a amostragem quando a textura aparece pequena na tela. O alinhamento de upload é ajustado para 1 e depois restaurado.
 
-O fragment shader texturizado multiplica a cor lida da imagem pela cor interpolada do vértice. O programa de cor utiliza a cor interpolada do vértice. Quando `selected` está ativo, mistura essa cor com laranja usando fator 0,55.
+O fragment shader texturizado multiplica a cor lida da imagem pela cor interpolada do vértice. O programa de cor utiliza a cor interpolada do vértice. Nos dois programas, quando `selected` está ativo, a cor é misturada com laranja usando fator 0,55.
 
 As variações de cor por face e pela superfície são definidas ao gerar os vértices. Não há fonte de luz dinâmica, sombras projetadas ou cálculo de iluminação por fragmento.
 
@@ -382,7 +388,7 @@ Isso expressa a velocidade em unidades por segundo, reduzindo a dependência da 
 Para evitar olhar exatamente na direção do vetor para cima ou na direção oposta, o que degeneraria a base da câmera.
 
 **O que acontece em uma casa ocupada?**  
-O movimento é aceito. As peças podem se sobrepor. Não há captura nem bloqueio de ocupação.
+O movimento é recusado e a seleção continua. A função `casaOcupada`, em `main.cpp`, percorre as 32 peças e compara linha e coluna com o destino. O aviso aparece no console e no título da janela. Não há captura: a peça que já está na casa permanece nela.
 
 **O movimento é contínuo?**  
 Não. O segundo clique atualiza diretamente a posição para o centro da casa escolhida. Não há arraste nem animação do percurso.
@@ -409,7 +415,8 @@ Há testes de coordenadas, raios, HiDPI, distribuição das peças, seleção ap
 | Construção do raio e interseções | `src/Interacao.cpp` |
 | MVP e passagem de atributos | `shaders/cena.vert` |
 | Cor e destaque da seleção | `shaders/cor.frag` |
-| Amostragem da textura | `shaders/textura.frag` |
+| Amostragem da textura e destaque nas partes texturizadas | `shaders/textura.frag` |
+| Escolha do shader de cada parte da peça | `Peca::desenhar` em `src/Peca.cpp` |
 | Leitura, upload e filtros da imagem | `src/Texture.cpp` |
 
 ## 6. Slides para revisar hoje
@@ -437,7 +444,7 @@ Alguns slides simplificam os conceitos ou usam outra versão de GLSL. Para a apr
 5. Mantenha abertas apenas as funções que pretende explicar. Comece pelo resultado visual; abra o código para justificar uma técnica.
 6. Revise as imagens em `plan/evidencias/` como apoio caso a demonstração ao vivo falhe.
 7. Não atribua a seleção por raio a um slide específico: ela é uma extensão baseada nos fundamentos das aulas.
-8. Não afirme iluminação dinâmica, validação de regras, captura, bloqueio de ocupação, arraste ou animação de movimento.
+8. Não afirme iluminação dinâmica, validação de regras, captura, arraste ou animação de movimento.
 
 ### Dez pontos para lembrar sem consulta
 
