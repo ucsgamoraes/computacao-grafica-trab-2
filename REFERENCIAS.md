@@ -119,8 +119,8 @@ Na etapa de planejamento, os materiais foram analisados seletivamente, sem execu
 ## Adaptações presentes no aplicativo
 
 - `Application`, `Object`, `Cube` e `Mesh`: inicialização, transformações, dados do cubo e buffers de E1, com propriedade dos recursos e layout posição/cor/UV de E4.
-- `include/Shader.h`: cópia de E1, com liberação do programa, estado de validade e interrupção após falha de leitura/compilação/link.
-- `Texture` e `stb_image`: carga de E1, com tratamento dos canais e alinhamento. `pedra-28.jpg` também foi copiada de E1.
+- `include/Shader.h`: adaptado de E1, com liberação do programa e estado de validade. Mantém apenas vertex/fragment shader e os setters de uniforms utilizados pela cena.
+- `Texture` e `stb_image`: carga de E1, com tratamento dos canais e alinhamento. O cabeçalho local de stb_image recebeu ajustes de tipos e remoção de duas variáveis redundantes. `pedra-28.jpg` também foi copiada de E1.
 - `Peca`: composição por `parts` e matriz pai de `Banrisul`, E1. As formas e proporções dos seis tipos foram construídas para este trabalho.
 - `Camera`: variáveis, `lookAt` e `viraCamera` de R5, com deslocamento em XZ e velocidade por tempo.
 - `main.cpp`: integração dos eventos do mouse a partir dos callbacks de E5; fluxo de renderização e shaders de E1/R3/R4.

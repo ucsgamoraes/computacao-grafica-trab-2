@@ -64,7 +64,7 @@ g++ -std=c++14 -Wall -Wextra -Wpedantic -O2 -DNDEBUG -Iinclude main.cpp src/*.cp
 ./bin/Debug/Xadrez3D
 ```
 
-Execute a partir da raiz. Recursos ausentes são informados no console e encerram a inicialização. A cópia de stb_image fornecida pelo professor gera três avisos com o GCC atual; os fontes do aplicativo compilam sem avisos nas opções acima.
+Execute a partir da raiz. Recursos ausentes são informados no console e encerram a inicialização. A cópia local de stb_image recebeu uma conversão explícita de tamanho e a remoção de duas variáveis redundantes para compilar sem avisos com o GCC atual.
 
 Os testes precisam de uma sessão gráfica com OpenGL:
 

@@ -105,7 +105,6 @@ int main() {
         tabuleiro.drawBase(textureShader);
 
         shader.use();
-        shader.setVec3("tint", glm::vec3(1.0f));
         shader.setBool("selected", false);
         shader.setMat4("view", view);
         shader.setMat4("projection", projection);
