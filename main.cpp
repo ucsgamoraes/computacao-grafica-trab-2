@@ -17,6 +17,13 @@ struct MouseState {
     int selecionada = -1;
 };
 
+// true se alguma peça já está na casa (linha, coluna).
+bool casaOcupada(const std::vector<std::unique_ptr<Peca>>& pecas, int linha, int coluna) {
+    for (const auto& peca : pecas)
+        if (peca->linha == linha && peca->coluna == coluna) return true;
+    return false;
+}
+
 void mouse_button_callback(GLFWwindow* window, int button, int action, int) {
     if (action != GLFW_PRESS) return;
     auto& input = *static_cast<MouseState*>(glfwGetWindowUserPointer(window));
@@ -52,6 +59,14 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int) {
             return;
         }
         Peca& peca = *input.pecas[input.selecionada];
+        if (casaOcupada(input.pecas, linha, coluna)) {
+            const std::string casa = std::string(1, static_cast<char>('A' + coluna)) + std::to_string(linha + 1);
+            std::cout << "Casa " << casa << " ocupada; selecao mantida." << std::endl;
+            const std::string title = "Xadrez 3D | " + peca.descricao() + " | Casa " + casa +
+                                      " ocupada; escolha outra";
+            glfwSetWindowTitle(window, title.c_str());
+            return;
+        }
         const std::string before = peca.descricao();
         peca.mover(linha, coluna);
         std::cout << "Movimento: " << before << " para " << peca.descricao() << std::endl;
@@ -80,7 +95,7 @@ int main() {
     glfwSetMouseButtonCallback(window, mouse_button_callback);
     std::cout << "W/A/S/D: caminhar | Setas: olhar | Q/Z: altura | Esc: sair\n"
                  "Clique esquerdo: selecionar, depois mover | Direito: cancelar\n"
-                 "Movimentos livres entre casas; sem turnos, captura ou bloqueio de ocupacao.\n"
+                 "Movimentos livres para casas vazias; sem turnos ou captura.\n"
               << std::flush;
     double lastTime = glfwGetTime();
     while (!glfwWindowShouldClose(window)) {
