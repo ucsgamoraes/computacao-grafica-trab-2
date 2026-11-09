@@ -14,7 +14,8 @@ Peca::Peca(int id, TipoPeca tipo, bool branca, int linha, int coluna)
 }
 
 void Peca::init() {
-    const glm::vec3 color = branca ? glm::vec3(0.94f, 0.89f, 0.75f) : glm::vec3(0.26f, 0.28f, 0.34f);
+    // A textura só tem os veios em cinza; esta cor dá o tom da madeira.
+    const glm::vec3 color = branca ? glm::vec3(0.96f, 0.84f, 0.62f) : glm::vec3(0.40f, 0.22f, 0.12f);
     auto add = [this](std::unique_ptr<Mesh> part, glm::vec3 position, glm::vec3 scale,
                       float angle = 0.0f, glm::vec3 rotation = glm::vec3(1, 0, 0)) {
         part->position = position;

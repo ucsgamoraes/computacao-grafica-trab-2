@@ -68,7 +68,7 @@ int main() {
     Shader shader("shaders/cena.vert", "shaders/cor.frag");
     Shader textureShader("shaders/cena.vert", "shaders/textura.frag");
     if (!shader.isValid() || !textureShader.isValid()) return 1;
-    Texture texture("res/images/pedra-28.jpg");
+    Texture texture("res/images/madeira.jpg");
     if (!texture.isValid()) return 1;
     Tabuleiro tabuleiro;
     auto pecas = criarPecas();

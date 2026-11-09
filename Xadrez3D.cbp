@@ -74,7 +74,7 @@
         <Unit filename="shaders/textura.frag">
             <Option compile="0" link="0" />
         </Unit>
-        <Unit filename="res/images/pedra-28.jpg">
+        <Unit filename="res/images/madeira.jpg">
             <Option compile="0" link="0" />
         </Unit>
     </Project>

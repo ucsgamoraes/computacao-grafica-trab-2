@@ -1,7 +1,7 @@
 #include "Tabuleiro.h"
 #include <cmath>
 
-Tabuleiro::Tabuleiro() {
+Tabuleiro::Tabuleiro() : base(glm::vec3(0.72f, 0.46f, 0.26f)) {  // tom da madeira da base
     base.position = glm::vec3(0.0f, -0.28f, 0.0f);
     base.scale = glm::vec3(8.5f, 0.32f, 8.5f);
     for (int linha = 0; linha < 8; ++linha) {
