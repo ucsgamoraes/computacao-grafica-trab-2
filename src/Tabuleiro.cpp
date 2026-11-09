@@ -24,15 +24,19 @@ void Tabuleiro::drawBase(Shader& shader) const {
     base.draw(shader, glm::mat4(1.0f));
 }
 
+// A coluna A fica em x = +3.5 e a H em x = -3.5. Vista do lado das brancas
+// (câmera em z negativo olhando para +z), +x aparece à esquerda da tela,
+// então A fica à esquerda, como num tabuleiro real.
 glm::vec3 Tabuleiro::centro(int linha, int coluna) {
-    return glm::vec3(coluna - 3.5f, 0.0f, linha - 3.5f);
+    return glm::vec3(3.5f - coluna, 0.0f, linha - 3.5f);
 }
 
+// Inverso de centro(): ponto do tabuleiro -> linha e coluna da casa.
 bool Tabuleiro::casa(glm::vec3 ponto, int& linha, int& coluna) {
     if (!std::isfinite(ponto.x) || !std::isfinite(ponto.z) ||
-        ponto.x < -4.0f || ponto.x >= 4.0f || ponto.z < -4.0f || ponto.z >= 4.0f)
+        ponto.x <= -4.0f || ponto.x > 4.0f || ponto.z < -4.0f || ponto.z >= 4.0f)
         return false;
-    coluna = static_cast<int>(std::floor(ponto.x + 4.0f));
+    coluna = static_cast<int>(std::floor(4.0f - ponto.x));
     linha = static_cast<int>(std::floor(ponto.z + 4.0f));
     return true;
 }
