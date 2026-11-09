@@ -20,16 +20,29 @@ else
     done
 fi
 
+flags=(-std=c++14 -Wall -Wextra -Wpedantic -O2 -DNDEBUG -Iinclude)
+if [[ "$(uname)" == Darwin ]]; then
+    # macOS: bibliotecas do Homebrew (brew install glfw glew glm).
+    compiler=clang++
+    prefix="$(brew --prefix 2>/dev/null || echo /opt/homebrew)"
+    flags+=(-DGL_SILENCE_DEPRECATION -I"$prefix/include")
+    libs=(-L"$prefix/lib" -lglfw -lGLEW -framework OpenGL)
+    missing='Instale o Xcode Command Line Tools: xcode-select --install'
+else
+    compiler=g++
+    libs=(-lglfw -lGLEW -lGL)
+    missing='Instale o pacote base-devel.'
+fi
+
 if [[ "$needs_build" == true ]]; then
-    if ! command -v g++ >/dev/null 2>&1; then
-        printf 'Compilador g++ não encontrado. Instale o pacote base-devel.\n' >&2
+    if ! command -v "$compiler" >/dev/null 2>&1; then
+        printf 'Compilador %s não encontrado. %s\n' "$compiler" "$missing" >&2
         exit 1
     fi
 
     printf 'Compilando Xadrez 3D...\n'
     mkdir -p bin/Release
-    g++ -std=c++14 -Wall -Wextra -Wpedantic -O2 -DNDEBUG -Iinclude \
-        "${sources[@]}" -o "$binary" -lglfw -lGLEW -lGL
+    "$compiler" "${flags[@]}" "${sources[@]}" -o "$binary" "${libs[@]}"
 fi
 
 exec "$project_dir/$binary"
